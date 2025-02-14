@@ -15,21 +15,25 @@ class ProteinSequenceGenerator {
 
         "UAU" to "Y",    "CAU" to "H", "AAU" to "N", "GAU" to "D",
         "UAC" to "Y",    "CAC" to "H", "AAC" to "N", "GAC" to "D",
-        "UAA" to "Stop", "CAA" to "Q", "AAA" to "K", "GAA" to "E",
-        "UAG" to "Stop", "CAG" to "Q", "AAG" to "K", "GAG" to "E",
+        "UAA" to " Stop", "CAA" to "Q", "AAA" to "K", "GAA" to "E",
+        "UAG" to " Stop", "CAG" to "Q", "AAG" to "K", "GAG" to "E",
 
         "UGU" to "C",    "CGU" to "R", "AGU" to "S", "GGU" to "G",
         "UGC" to "C",    "CGC" to "R", "AGC" to "S", "GGC" to "G",
-        "UGA" to "Stop", "CGA" to "R", "AGA" to "R", "GGA" to "G",
+        "UGA" to " Stop", "CGA" to "R", "AGA" to "R", "GGA" to "G",
         "UGG" to "W",    "CGG" to "R", "AGG" to "R", "GGG" to "G"
     )
 
     fun generateProteinSequence(rnaSequence: String): String {
         val proteinSequence = StringBuilder()
         for (i in 0 until rnaSequence.length step 3) {
-            val codon = rnaSequence.substring(i, i + 3)
-            val aminoAcid = codonTable[codon] ?: throw IllegalArgumentException("Invalid codon: $codon")
-            proteinSequence.append(aminoAcid)
+            if (i + 3 <= rnaSequence.length) {
+                val codon = rnaSequence.substring(i, i + 3)
+                val aminoAcid = codonTable[codon] ?: throw IllegalArgumentException("Invalid codon: $codon")
+                proteinSequence.append(aminoAcid)
+            } else {
+                proteinSequence.append(" Can't read next codon. Stopped.")
+            }
         }
 
         return proteinSequence.toString()
