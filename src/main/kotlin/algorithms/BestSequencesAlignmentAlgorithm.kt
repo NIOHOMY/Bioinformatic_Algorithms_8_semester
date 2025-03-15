@@ -2,6 +2,20 @@ package labs.com.algorithms
 
 class BestSequencesAlignmentAlgorithm {
 
+    /**
+     * ## Алгоритм глобального выравнивания Нидлмана-Вунша
+     *
+     * ###### Описание:
+     * Строит матрицу сходства M_i_j для всего выравнивания, начиная с верхнего левого угла и заполняя всю матрицу
+     * с учётом штрафов за пробелы и матрицы весов.
+     *
+     * * Имеет квадратичные затраты памяти и времени.
+     *
+     *  @return **Число**, полученное в правом нижнем углу матрицы M.
+     *
+     * **Выравнивание**, полученное через обратный обход, начиная с правого нижнего угла,
+     * по ячейкам, имеющих максимальный вес.
+     */
     fun global(
         seq1: String,
         seq2: String,
@@ -24,8 +38,8 @@ class BestSequencesAlignmentAlgorithm {
             }
         }
 
-        var alignment1 = StringBuilder()
-        var alignment2 = StringBuilder()
+        val alignment1 = StringBuilder()
+        val alignment2 = StringBuilder()
         var i = m
         var j = n
 
@@ -60,6 +74,20 @@ class BestSequencesAlignmentAlgorithm {
         return Pair(alignment1.reverse().toString(), dp[m][n])
     }
 
+    /**
+     * ## Алгоритм локального выравнивания Смита–Ватермана
+     *
+     * ###### Описание:
+     * Решает задачу поиска гомологичных участков в двух последовательностях,
+     * применяя матрицу сходства M_i_j.
+     *
+     * * На момент начала построения значения элементов верхней строки и
+     * левого столбца матрицы M считаются равными нулю.
+     *
+     *  @return **Число**, полученное наибольшее число матрицы M.
+     *
+     * **Выравнивание**, полученное через обратный обход, начиная с наибольшего числа и заканчивается в клетке с нулём.
+     */
     fun local(
         seq1: String,
         seq2: String,
@@ -86,8 +114,8 @@ class BestSequencesAlignmentAlgorithm {
             }
         }
 
-        var alignment1 = StringBuilder()
-        var alignment2 = StringBuilder()
+        val alignment1 = StringBuilder()
+        val alignment2 = StringBuilder()
         var i = maxPos.first
         var j = maxPos.second
 
