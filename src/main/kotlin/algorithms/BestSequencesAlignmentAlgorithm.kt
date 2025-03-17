@@ -24,7 +24,7 @@ class BestSequencesAlignmentAlgorithm {
      * по ячейкам, имеющих максимальный вес.
      */
     fun global(
-        seqA: String, seqB: String, match: Int, mismatch: Int, weightMatrix: Array<IntArray>, gapFine: Int
+        seqA: String, seqB: String, weightMatrix: Array<IntArray>, gapFine: Int
     ): Pair<Pair<String, String>, Int> {
         val n = seqA.length
         val m = seqB.length
@@ -40,7 +40,7 @@ class BestSequencesAlignmentAlgorithm {
 
         for (i in 1..n) {
             for (j in 1..m) {
-                val matchScore = if (seqA[i - 1] == seqB[j - 1]) match else mismatch
+                val matchScore = getWeight(seqA[i - 1], seqB[j - 1], weightMatrix)
                 scoreMatrix[i][j] = maxOf(
                     scoreMatrix[i - 1][j - 1] + matchScore,
                     scoreMatrix[i - 1][j] + gapFine,
@@ -57,7 +57,7 @@ class BestSequencesAlignmentAlgorithm {
 
         while (i > 0 || j > 0) {
             when {
-                i > 0 && j > 0 && scoreMatrix[i][j] == scoreMatrix[i - 1][j - 1] + (if (seqA[i - 1] == seqB[j - 1]) match else mismatch) -> {
+                i > 0 && j > 0 && scoreMatrix[i][j] == scoreMatrix[i - 1][j - 1] + (getWeight(seqA[i - 1], seqB[j - 1], weightMatrix)) -> {
                     alignedA.append(seqA[i - 1])
                     alignedB.append(seqB[j - 1])
                     i--
@@ -96,7 +96,7 @@ class BestSequencesAlignmentAlgorithm {
      * **Выравнивание**, полученное через обратный обход, начиная с наибольшего числа и заканчивается в клетке с нулём.
      */
     fun local(
-        seqA: String, seqB: String, match: Int, mismatch: Int, weightMatrix: Array<IntArray>, gapFine: Int
+        seqA: String, seqB: String, weightMatrix: Array<IntArray>, gapFine: Int
     ): Pair<Pair<String, String>, Int> {
         val lenA = seqA.length
         val lenB = seqB.length
@@ -107,7 +107,7 @@ class BestSequencesAlignmentAlgorithm {
 
         for (i in 1..lenA) {
             for (j in 1..lenB) {
-                val score = if (seqA[i - 1] == seqB[j - 1]) match else mismatch
+                val score = getWeight(seqA[i - 1], seqB[j - 1], weightMatrix)
                 val diagonal = matrix[i - 1][j - 1] + score
                 val up = matrix[i - 1][j] + gapFine
                 val left = matrix[i][j - 1] + gapFine
@@ -121,8 +121,8 @@ class BestSequencesAlignmentAlgorithm {
             }
         }
 
-        var alignedA = StringBuilder()
-        var alignedB = StringBuilder()
+        val alignedA = StringBuilder()
+        val alignedB = StringBuilder()
         var i = maxI
         var j = maxJ
 

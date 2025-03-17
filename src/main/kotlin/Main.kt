@@ -23,6 +23,10 @@ private val weightMatrix = arrayOf(
 private const val GapFine = -1
 
 fun main() {
+    println()
+    testGlobal()
+    println()
+    testLocal()
     val fileReader = FileReader()
     try {
         val str1 = fileReader.readFromFile(
@@ -41,8 +45,6 @@ fun main() {
     } catch (e: Exception) {
         println("Error: ${e.message}")
     }
-    testGlobal()
-    testLocal()
 }
 
 
@@ -50,7 +52,7 @@ fun testGlobal() {
     val seqA = "ACGTGAC"
     val seqB = "GACGTC"
 
-    val (aligned, score) = alignmentAlgorithm.global(seqA, seqB, 1, -2, weightMatrix, GapFine)
+    val (aligned, score) = alignmentAlgorithm.global(seqA, seqB, weightMatrix, GapFine)
 
     println("Global")
     println("A: ${aligned.first}")
@@ -63,20 +65,20 @@ fun testLocal() {
     val seqA = "ACGTGAC"
     val seqB = "GACGTC"
 
-    val (aligned, score) = alignmentAlgorithm.local(seqA, seqB, 1, -2, weightMatrix, GapFine)
+    val (aligned, score) = alignmentAlgorithm.local(seqA, seqB, weightMatrix, GapFine)
     println("Local")
     println("A: ${aligned.first}")
     println("B: ${aligned.second}")
-    println("B: ${score}")
+    println("Score: ${score}")
 }
 
 
 private fun task1(str1: String, str2: String) {
-    val (globalAlignment, score) = alignmentAlgorithm.global(str1, str2, 1, -2, weightMatrix, GapFine)
+    val (globalAlignment, score) = alignmentAlgorithm.global(str1, str2, weightMatrix, GapFine)
     println("Global Alignment: \nA: ${globalAlignment.first}, \nB: ${globalAlignment.second} \n Score: ${score}")
 }
 
 private fun task2(str1: String, str2: String) {
-    val (localAlignment, score) = alignmentAlgorithm.local(str1, str2, 1, -2, weightMatrix, GapFine)
+    val (localAlignment, score) = alignmentAlgorithm.local(str1, str2, weightMatrix, GapFine)
     println("Local Alignment: \nA: ${localAlignment.first}, \nB: ${localAlignment.second} \n Score: ${score}")
 }
