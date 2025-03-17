@@ -24,61 +24,61 @@ class BestSequencesAlignmentAlgorithm {
      * по ячейкам, имеющих максимальный вес.
      */
     fun global(
-        seq1: String,
-        seq2: String,
-        weightMatrix: Array<IntArray>,
-        gapFine: Int
-    ): Pair<String, Int> {
-        val m = seq1.length
-        val n = seq2.length
-        val dp = Array(m + 1) { IntArray(n + 1) }
+        seqA: String, seqB: String, match: Int, mismatch: Int, weightMatrix: Array<IntArray>, gapFine: Int
+    ): Pair<Pair<String, String>, Int> {
+        val n = seqA.length
+        val m = seqB.length
 
-        for (i in 0..m) dp[i][0] = gapFine * i
-        for (j in 0..n) dp[0][j] = gapFine * j
+        val scoreMatrix = Array(n + 1) { IntArray(m + 1) }
 
-        for (i in 1..m) {
-            for (j in 1..n) {
-                val match = dp[i - 1][j - 1] + getWeight(seq1[i - 1], seq2[j - 1], weightMatrix)
-                val delete = dp[i - 1][j] + gapFine
-                val insert = dp[i][j - 1] + gapFine
-                dp[i][j] = maxOf(match, delete, insert)
+        for (i in 0..n) {
+            scoreMatrix[i][0] = i * gapFine
+        }
+        for (j in 0..m) {
+            scoreMatrix[0][j] = j * gapFine
+        }
+
+        for (i in 1..n) {
+            for (j in 1..m) {
+                val matchScore = if (seqA[i - 1] == seqB[j - 1]) match else mismatch
+                scoreMatrix[i][j] = maxOf(
+                    scoreMatrix[i - 1][j - 1] + matchScore,
+                    scoreMatrix[i - 1][j] + gapFine,
+                    scoreMatrix[i][j - 1] + gapFine
+                )
             }
         }
 
-        val alignment1 = StringBuilder()
-        val alignment2 = StringBuilder()
-        var i = m
-        var j = n
+        val alignedA = StringBuilder()
+        val alignedB = StringBuilder()
+        var i = n
+        var j = m
+        val maxScore = scoreMatrix[i - 1][j - 1]
 
-        while (i > 0 && j > 0) {
-            if (dp[i][j] == dp[i - 1][j - 1] + getWeight(seq1[i - 1], seq2[j - 1], weightMatrix)) {
-                alignment1.append(seq1[i - 1])
-                alignment2.append(seq2[j - 1])
-                i--
-                j--
-            } else if (dp[i][j] == dp[i - 1][j] + gapFine) {
-                alignment1.append(seq1[i - 1])
-                alignment2.append('-')
-                i--
-            } else {
-                alignment1.append('-')
-                alignment2.append(seq2[j - 1])
-                j--
+        while (i > 0 || j > 0) {
+            when {
+                i > 0 && j > 0 && scoreMatrix[i][j] == scoreMatrix[i - 1][j - 1] + (if (seqA[i - 1] == seqB[j - 1]) match else mismatch) -> {
+                    alignedA.append(seqA[i - 1])
+                    alignedB.append(seqB[j - 1])
+                    i--
+                    j--
+                }
+
+                i > 0 && scoreMatrix[i][j] == scoreMatrix[i - 1][j] + gapFine -> {
+                    alignedA.append(seqA[i - 1])
+                    alignedB.append('-')
+                    i--
+                }
+
+                j > 0 && scoreMatrix[i][j] == scoreMatrix[i][j - 1] + gapFine -> {
+                    alignedA.append('-')
+                    alignedB.append(seqB[j - 1])
+                    j--
+                }
             }
         }
 
-        while (i > 0) {
-            alignment1.append(seq1[i - 1])
-            alignment2.append('-')
-            i--
-        }
-        while (j > 0) {
-            alignment1.append('-')
-            alignment2.append(seq2[j - 1])
-            j--
-        }
-
-        return Pair(alignment1.reverse().toString(), dp[m][n])
+        return Pair(alignedA.reverse().toString(), alignedB.reverse().toString()) to maxScore
     }
 
     /**
@@ -96,54 +96,54 @@ class BestSequencesAlignmentAlgorithm {
      * **Выравнивание**, полученное через обратный обход, начиная с наибольшего числа и заканчивается в клетке с нулём.
      */
     fun local(
-        seq1: String,
-        seq2: String,
-        weightMatrix: Array<IntArray>,
-        gapFine: Int
-    ): Pair<String, Int> {
-        val m = seq1.length
-        val n = seq2.length
-        val dp = Array(m + 1) { IntArray(n + 1) }
+        seqA: String, seqB: String, match: Int, mismatch: Int, weightMatrix: Array<IntArray>, gapFine: Int
+    ): Pair<Pair<String, String>, Int> {
+        val lenA = seqA.length
+        val lenB = seqB.length
+        val matrix = Array(lenA + 1) { IntArray(lenB + 1) }
         var maxScore = 0
-        var maxPos = Pair(0, 0)
+        var maxI = 0
+        var maxJ = 0
 
-        for (i in 1..m) {
-            for (j in 1..n) {
-                val match = dp[i - 1][j - 1] + getWeight(seq1[i - 1], seq2[j - 1], weightMatrix)
-                val delete = dp[i - 1][j] + gapFine
-                val insert = dp[i][j - 1] + gapFine
-                dp[i][j] = maxOf(match, delete, insert, 0)
+        for (i in 1..lenA) {
+            for (j in 1..lenB) {
+                val score = if (seqA[i - 1] == seqB[j - 1]) match else mismatch
+                val diagonal = matrix[i - 1][j - 1] + score
+                val up = matrix[i - 1][j] + gapFine
+                val left = matrix[i][j - 1] + gapFine
+                matrix[i][j] = maxOf(0, diagonal, up, left)
 
-                if (dp[i][j] > maxScore) {
-                    maxScore = dp[i][j]
-                    maxPos = Pair(i, j)
+                if (matrix[i][j] > maxScore) {
+                    maxScore = matrix[i][j]
+                    maxI = i
+                    maxJ = j
                 }
             }
         }
 
-        val alignment1 = StringBuilder()
-        val alignment2 = StringBuilder()
-        var i = maxPos.first
-        var j = maxPos.second
+        var alignedA = StringBuilder()
+        var alignedB = StringBuilder()
+        var i = maxI
+        var j = maxJ
 
-        while (i > 0 && j > 0 && dp[i][j] > 0) {
-            if (dp[i][j] == dp[i - 1][j - 1] + getWeight(seq1[i - 1], seq2[j - 1], weightMatrix)) {
-                alignment1.append(seq1[i - 1])
-                alignment2.append(seq2[j - 1])
+        while (i > 0 && j > 0 && matrix[i][j] > 0) {
+            if (matrix[i][j] == matrix[i - 1][j] + gapFine) {
+                alignedA.append(seqA[i - 1])
+                alignedB.append('-')
                 i--
+            } else if (matrix[i][j] == matrix[i][j - 1] + gapFine) {
+                alignedA.append('-')
+                alignedB.append(seqB[j - 1])
                 j--
-            } else if (dp[i][j] == dp[i - 1][j] + gapFine) {
-                alignment1.append(seq1[i - 1])
-                alignment2.append('-')
-                i--
             } else {
-                alignment1.append('-')
-                alignment2.append(seq2[j - 1])
+                alignedA.append(seqA[i - 1])
+                alignedB.append(seqB[j - 1])
+                i--
                 j--
             }
         }
 
-        return Pair(alignment1.reverse().toString(), maxScore)
+        return Pair(alignedA.reverse().toString(), alignedB.reverse().toString()) to maxScore
     }
 
     private fun getWeight(char1: Char, char2: Char, scoringMatrix: Array<IntArray>): Int {
