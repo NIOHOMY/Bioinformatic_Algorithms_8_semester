@@ -10,6 +10,6 @@ class FileReader {
             throw IllegalArgumentException("File does not exist")
         }
 
-        return file.readLines().drop(linesToDrop).joinToString("\n")
+        return file.readLines().drop(linesToDrop).joinToString("\n").replace("\n", "")
     }
 }
